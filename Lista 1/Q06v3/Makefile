@@ -2,7 +2,7 @@ NOME = main
 
 all: $(NOME).o
 	gcc -m32 $(NOME).o -o $(NOME)
-	./$(NOME) <entrada.txt
+	./$(NOME)
 	rm -rf *.o
 
 %.o: %.asm

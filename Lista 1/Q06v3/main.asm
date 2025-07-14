@@ -1,57 +1,127 @@
-;mesmo código de Q05
 section .data
-    msg1 db "digite o primeiro número: ", 0
-    msg2 db "digite o segundo número: ", 0
-    msg3 db "digite o terceiro número: ", 0
+    filename db  "entrada.txt", 0
+    newline db  10
+    num1 dd  0
+    num2 dd  0
+    num3 dd  0
 
-    num1 dd 0
-    num2 dd 0
-    num3 dd 0
-    
-    read db "%d",0
-    fmt db "Soma dos dois moiores: %d", 0xA, 0
+section .bss
+    buffer resb 64  
+buffer_end equ buffer + 64
 
 section .text
-    global main
-    extern printf
-    extern scanf
+    global  main
+    extern  atoi
 
-main:    
-    push dword num1
-    push dword read
-    call scanf
-    add esp,8
+main:
+    mov     eax, 5 
+    mov     ebx, filename
+    xor     ecx, ecx 
+    xor     edx, edx 
+    int     0x80
+    mov     ebp, eax 
+
+    mov     eax, 3  
+    mov     ebx, ebp
+    mov     ecx, buffer
+    mov     edx, 64
+    int     0x80
+
+    mov     eax, 6   
+    mov     ebx, ebp
+    int     0x80
+
+ 
+    lea     esi, [buffer]  
+    push    esi
+    call    atoi
+    add     esp, 4
+    mov     [num1], eax
+
+.skip1:
+    mov     al, [esi]
+    cmp     al, 10    
+    je      .after1
+    inc     esi
+    jmp     .skip1
+.after1:
+    inc     esi 
+
+    push    esi
+    call    atoi
+    add     esp, 4
+    mov     [num2], eax
+
+.skip2:
+    mov     al, [esi]
+    cmp     al, 10
+    je      .after2
+    inc     esi
+    jmp     .skip2
+.after2:
+    inc     esi              
+
+    push    esi
+    call    atoi
+    add     esp, 4
+    mov     [num3], eax
+
+    mov     eax, [num1]
+    mov     ebx, [num2]
+    mov     ecx, [num3]
+
+    mov     edx, eax          
+    cmp     ebx, edx
+    cmovl   edx, ebx
+    cmp     ecx, edx
+    cmovl   edx, ecx
+
+    mov     eax, [num1]
+    add     eax, [num2]
+    add     eax, [num3]
+    sub     eax, edx      
 
 
-    push dword num2
-    push dword read
-    call scanf
-    add esp,8
+    mov     edi, buffer_end   
+    call    print_int
 
+    xor     eax, eax   
+    ret
 
-    push dword num3
-    push dword read
-    call scanf
-    add esp,8
+print_int:
+    mov     ebx, 10
+    cmp     eax, 0
+    jge     .PIP_POS
+    push    eax
+    mov     eax, 4
+    mov     ebx, 1
+    mov     ecx, newline
+    mov     edx, 1
+    int     0x80
+    pop     eax
+    neg     eax
+.PIP_POS:
+    xor     edx, edx
+.loop:
+    xor     edx, edx
+    div     ebx
+    add     dl, '0'
+    dec     edi
+    mov     [edi], dl
+    cmp     eax, 0
+    jne     .loop
 
-    mov eax, [num1]
-    mov ebx, [num2]
-    mov ecx, [num3]
+    mov     eax, 4
+    mov     ebx, 1
+    mov     ecx, edi
+    lea     edx, [buffer_end]
+    sub     edx, ecx
+    int     0x80
 
-    mov edx, eax
-    cmp ebx, edx
-    cmovl edx, ebx
-    cmp ecx, edx
-    cmovl edx, ecx
-    
-    add eax, [num2]
-    add eax, [num3]
-    sub eax, edx
+    mov     eax, 4
+    mov     ebx, 1
+    mov     ecx, newline
+    mov     edx, 1
+    int     0x80
 
-    push eax
-    push dword fmt
-    call printf
-    add esp, 8
-
-    xor eax, eax
     ret

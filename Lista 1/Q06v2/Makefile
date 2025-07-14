@@ -2,7 +2,7 @@ NOME = main
 
 all: $(NOME).o
 	gcc -m32 $(NOME).o -o $(NOME)
-	./$(NOME) 23 -5 12
+	./$(NOME) 21 -5 12
 	rm -rf *.o
 
 %.o: %.asm

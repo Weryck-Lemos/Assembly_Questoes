@@ -1,15 +1,13 @@
-NOME   = programa
-all: $(NOME)
+NOME = print_array_int
+FUNC = soma_vetores
 
-$(NOME): print_array_int.o soma_vetores.o
-	gcc -no-pie -s -o $@ $^
+all:
+	nasm -f elf32 $(NOME).asm -o $(NOME).o
+	gcc -m32 -c $(FUNC).c -o $(FUNC).o
+	gcc -m32 $(NOME).o $(FUNC).o -o $(NOME)
 
-print_array_int.o: print_array_int.asm
-	nasm -f elf64 $< -o $@
+clean:
+	rm -f $(NOME).o $(FUNC).o $(NOME)
 
-soma_vetores.o: soma_vetores.c
-	gcc -c $< -o $@
-
-run: $(NOME)
-	./$(NOME)
-	rm -f $(NOME) print_array_int.o soma_vetores.o
+run:
+	./print_array_int

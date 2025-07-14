@@ -1,50 +1,47 @@
 section .data
-    msg1 db "digite o primeiro número: ", 0
-    msg2 db "digite o segundo número: ", 0
-    msg3 db "digite o terceiro número: ", 0
+    txt      db "Digite um numero: ", 0
+    tam      equ $ - txt
+    newline  db 10
 
-    num1 dd 0
-    num2 dd 0
-    num3 dd 0
-    
-    read db "%d",0
-    fmt db "Soma dos dois moiores: %d", 0xA, 0
+section .bss
+    entrada  resb 12 
+    buffer   resb 11      
+    num1     resd 1
+    num2     resd 1
+    num3     resd 1
 
 section .text
     global main
-    extern printf
-    extern scanf
 
-main:    
-    push msg1
-    call printf
-    add esp,4
+main:
 
-    push dword num1
-    push dword read
-    call scanf
-    add esp,8
+    call print_prompt
+    mov eax, 3 
+    mov ebx, 0 
+    mov ecx, entrada
+    mov edx, 12
+    int 0x80
+    call atoi  
+    mov [num1], eax
 
+    call print_prompt
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, entrada
+    mov edx, 12
+    int 0x80
+    call atoi
+    mov [num2], eax
 
+    call print_prompt
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, entrada
+    mov edx, 12
+    int 0x80
+    call atoi
+    mov [num3], eax
 
-    push msg2
-    call printf
-    add esp,4
-
-    push dword num2
-    push dword read
-    call scanf
-    add esp,8
-
-
-    push msg3
-    call printf
-    add esp,4
-
-    push dword num3
-    push dword read
-    call scanf
-    add esp,8
 
     mov eax, [num1]
     mov ebx, [num2]
@@ -55,15 +52,77 @@ main:
     cmovl edx, ebx
     cmp ecx, edx
     cmovl edx, ecx
-    
-    add eax, [num2]
-    add eax, [num3]
-    sub eax, edx
 
-    push eax
-    push dword fmt
-    call printf
-    add esp, 8
+    mov esi, eax
+    add esi, ebx
+    add esi, ecx
+    sub esi, edx
+
+    mov eax, esi
+    mov ecx, 10
+    mov edi, buffer + 11  
+    call converter_digits
 
     xor eax, eax
+    ret
+
+
+print_prompt:
+    mov eax, 4   
+    mov ebx, 1   
+    mov ecx, txt
+    mov edx, tam
+    int 0x80
+    ret
+
+
+atoi:
+    xor eax, eax 
+    xor ebx, ebx         
+.next_char:
+    movzx edx, byte [entrada + ebx]
+    cmp dl, 10          
+    je .done
+    cmp dl, 0 
+    je .done
+    sub dl, '0'
+    imul eax, eax, 10
+    add eax, edx
+    inc ebx
+    jmp .next_char
+.done:
+    ret
+
+
+converter_digits:
+    cmp eax, 0
+    jne .conv
+    dec edi
+    mov byte [edi], '0'
+    jmp .print_digits
+
+.conv:
+    xor edx, edx
+.loop:
+    div ecx          
+    add dl, '0'
+    dec edi
+    mov [edi], dl
+    xor edx, edx
+    cmp eax, 0
+    jne .loop
+
+.print_digits:
+    mov eax, 4  
+    mov ebx, 1     
+    mov ecx, edi
+    lea edx, [buffer + 11]
+    sub edx, ecx
+    int 0x80
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, newline
+    mov edx, 1
+    int 0x80
     ret

@@ -1,0 +1,60 @@
+     1                                  section .bss
+     2 00000000 <res 00000004>              time_val resd 1            ; timestamp
+     3 00000004 <res 0000000C>              time_str resb 12           ; buffer para a string ASCII
+     4                                  section .text
+     5                                      global _start
+     6                                  
+     7                                  _start:
+     8 00000000 4531D2                      xor r10d,r10d
+     9                                  
+    10                                  ler_hora:
+    11                                      ; chamar time 
+    12 00000003 B80D000000                  mov eax, 13            ; syscall: time
+    13 00000008 BB[00000000]                mov ebx, time_val      ; endereço para armazenar o tempo
+    14 0000000D CD80                        int 0x80
+    15                                  
+    16                                      ; carregar valor de tempo 
+    17 0000000F 8B0425[00000000]            mov eax, [time_val]    ; carrega timestamp em eax
+    18                                      
+    19 00000016 8B0425[00000000]            mov dword eax, [time_val]
+    20 0000001D 4439D0                      cmp eax, r10d
+    21 00000020 74E1                        je ler_hora
+    22 00000022 4189C2                      mov r10d, eax
+    23                                      
+    24                                  
+    25                                      ; converter inteiro para string (base 10) 
+    26 00000025 BF[04000000]                mov edi, time_str      ; ponteiro para buffer
+    27 0000002A 83C70B                      add edi, 11            ; aponta para o fim
+    28 0000002D 67C6070D                    mov byte [edi], 0xD   ; adiciona newline
+    29 00000031 FFCF                        dec edi                ; posiciona antes do newline
+    30                                  
+    31                                  convert_loop:
+    32 00000033 31D2                        xor edx, edx
+    33 00000035 B90A000000                  mov ecx, 10
+    34 0000003A F7F1                        div ecx                ; divide eax por 10, resultado em eax, resto em edx
+    35 0000003C 80C230                      add dl, '0'
+    36 0000003F 678817                      mov [edi], dl
+    37 00000042 FFCF                        dec edi
+    38 00000044 85C0                        test eax, eax
+    39 00000046 75EB                        jnz convert_loop
+    40                                  
+    41 00000048 FFC7                        inc edi                ; ajusta para apontar para o início da string
+    42                                  
+    43                                      ; imprimir string 
+    44 0000004A B804000000                  mov eax, 4             ; syscall: write
+    45 0000004F BB01000000                  mov ebx, 1             ; stdout
+    46 00000054 89F9                        mov ecx, edi           ; ponteiro para string
+    47 00000056 31D2                        xor edx, edx
+    48 00000058 BA[04000000]                mov edx, time_str
+    49 0000005D 83C20C                      add edx, 12
+    50 00000060 29FA                        sub edx, edi
+    51                                  ;    mov edx, time_str + 12 - edi ; comprimento
+    52 00000062 CD80                        int 0x80
+    53                                  
+    54 00000064 EB9D                         jmp ler_hora
+    55                                  
+    56                                      ; exit 
+    57 00000066 B801000000                  mov eax, 1
+    58 0000006B 31DB                        xor ebx, ebx
+    59 0000006D CD80                        int 0x80
+    60                                  

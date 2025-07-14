@@ -1,13 +1,16 @@
 section .data
-    mat dd 2,-3,1   ;a:0   b:4   c:8 
-        dd 2,0,-1   ;d:12  e:16  f:20
-        dd 1,4,5   ;g:24  h:28  i:32
+    mat dd 4,5,-3   ;a:0   b:4   c:8 
+        dd 2,1,0   ;d:12  e:16  f:20
+        dd 3,-1,1   ;g:24  h:28  i:32
+    newline db 0xA
 
     fmt db "Determinante: %d", 0xA, 0
 
+section .bss
+    buffer resb 12
+
 section .text
     global main
-    extern printf
 
 main:
 
@@ -59,10 +62,36 @@ main:
     sub ecx, eax
 
 
-    push ecx
-    push fmt
-    call printf
-    add esp,8
+    mov eax, ecx
+    mov ecx, 10
+    lea   edi, [buffer + 12]
+    call converter_digitos
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, newline
+    mov edx, 1
+    int 0x80
+
 
     xor eax, eax
+    ret
+
+converter_digitos:
+    xor edx, edx
+    div ecx
+    add dl, '0'
+    dec edi
+    mov [edi], dl
+
+    cmp eax, 0
+    jnz converter_digitos
+
+    mov edx, buffer + 12
+    sub edx, edi
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, edi
+    int 0x80
+
     ret

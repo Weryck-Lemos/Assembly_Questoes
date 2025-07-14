@@ -1,6 +1,3 @@
-;Crie uma função assembly que imprima na tela um número inteiro sinalizado, 
-;definido na seção data, independente da quantidade de dígitos.
-
 section .data
     numero dd -1545
     buffer times 13 db 0
