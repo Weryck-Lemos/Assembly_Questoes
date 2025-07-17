@@ -14,6 +14,7 @@ section .text
     extern  atoi
 
 main:
+;abrir
     mov     eax, 5 
     mov     ebx, filename
     xor     ecx, ecx 
@@ -21,12 +22,14 @@ main:
     int     0x80
     mov     ebp, eax 
 
+;ler
     mov     eax, 3  
     mov     ebx, ebp
     mov     ecx, buffer
     mov     edx, 64
     int     0x80
 
+;fechar
     mov     eax, 6   
     mov     ebx, ebp
     int     0x80
@@ -38,6 +41,7 @@ main:
     add     esp, 4
     mov     [num1], eax
 
+;primeiro \n
 .skip1:
     mov     al, [esi]
     cmp     al, 10    
@@ -52,6 +56,7 @@ main:
     add     esp, 4
     mov     [num2], eax
 
+;segundo \n
 .skip2:
     mov     al, [esi]
     cmp     al, 10
