@@ -1,0 +1,88 @@
+     1                                  ; Flags
+     2                                  
+     3                                  O_RDONLY   equ 0            ; Apenas leitura                           
+     4                                  O_WRONLY   equ 1            ; Apenas escrita                           
+     5                                  O_RDWR     equ 2            ; Leitura e escrita                        
+     6                                  O_CREAT    equ 0x40         ; Cria o arquivo se não existir            
+     7                                  O_EXCL     equ 0x80         ; Erro se `O_CREAT` + arquivo existir      
+     8                                  O_NOCTTY   equ 0x100        ; Não torna o arquivo terminal de controle 
+     9                                  O_TRUNC    equ 0x200        ; Trunca arquivo para tamanho 0 se existir 
+    10                                  O_APPEND   equ 0x400        ; Escreve sempre ao final do arquivo       
+    11                                  O_NONBLOCK equ 0x800        ; I/O não bloqueante                       
+    12                                  
+    13                                  
+    14                                  section .data
+    15                                  
+    16 00000000 74657374652E747874-         filename db "teste.txt", 0
+    16 00000009 00                 
+    17 0000000A 48656C6C6F20576F72-         msg db "Hello World!", 0xA
+    17 00000013 6C64210A           
+    18                                      msg_len equ $ - msg
+    19                                  
+    20                                  section .bss
+    21 00000000 <res 80h>                   buffer resb 128
+    22 00000080 ????????                    time_var resd 1
+    23                                  
+    24                                  section .text
+    25                                      global _start
+    26                                  
+    27                                  _start:
+    28                                  
+    29                                      ; open file (cria e habilita a escrita)
+    30 00000000 B805000000                  mov eax, 5              ; open
+    31 00000005 BB[00000000]                mov ebx, filename       ; file name
+    32 0000000A 31C9                        xor ecx, ecx 
+    33 0000000C 83C940                      or ecx, O_CREAT        ; flag O_CREAT
+    34 0000000F 83C901                      or ecx, O_WRONLY       ; flag O_WRONLY
+    35 00000012 BAA4010000                  mov edx, 0o644          ; mode: rw-r--r--
+    36 00000017 CD80                        int 0x80
+    37                                  
+    38 00000019 89C6                        mov esi, eax            ; file descriptor volta no eax
+    39                                  
+    40                                      ; write to file
+    41 0000001B B804000000                  mov eax, 4              ; write
+    42 00000020 89F3                        mov ebx, esi            ; file descriptor
+    43 00000022 B9[0A000000]                mov ecx, msg            ; buffer
+    44 00000027 BA0D000000                  mov edx, msg_len        ; length
+    45 0000002C CD80                        int 0x80
+    46                                  
+    47                                      ; close file 
+    48 0000002E B806000000                  mov eax, 6              ; close
+    49 00000033 89F3                        mov ebx, esi            ; file descriptor
+    50 00000035 CD80                        int 0x80
+    51                                  
+    52                                      ; open file (somente leitura)
+    53 00000037 B805000000                  mov eax, 5
+    54 0000003C BB[00000000]                mov ebx, filename
+    55 00000041 B900000000                  mov ecx, O_RDONLY       
+    56 00000046 BA00000000                  mov edx, 0
+    57 0000004B CD80                        int 0x80
+    58                                  
+    59 0000004D 89C6                        mov esi, eax            ; file descriptor
+    60                                  
+    61                                      ; read from file
+    62 0000004F B803000000                  mov eax, 3              ; syscall: read
+    63 00000054 89F3                        mov ebx, esi            ; file descriptor
+    64 00000056 B9[00000000]                mov ecx, buffer         ; buffer
+    65 0000005B BA80000000                  mov edx, 128            ; size
+    66 00000060 CD80                        int 0x80
+    67                                  
+    68 00000062 89C7                        mov edi, eax            ; number of bytes read
+    69                                  
+    70                                      ; close file
+    71 00000064 B806000000                  mov eax, 6
+    72 00000069 89F3                        mov ebx, esi
+    73 0000006B CD80                        int 0x80
+    74                                  
+    75                                      ; write to stdout
+    76 0000006D B804000000                  mov eax, 4
+    77 00000072 BB01000000                  mov ebx, 1              ; stdout
+    78 00000077 B9[00000000]                mov ecx, buffer
+    79 0000007C 89FA                        mov edx, edi            ; bytes read
+    80 0000007E CD80                        int 0x80
+    81                                  
+    82                                      ; exit
+    83 00000080 B801000000                  mov eax, 1              ; 
+    84 00000085 31DB                        xor ebx, ebx
+    85 00000087 CD80                        int 0x80
+    86                                  

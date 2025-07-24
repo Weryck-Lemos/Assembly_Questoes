@@ -1,6 +1,6 @@
      1                                  section .bss
-     2 00000000 <res 00000004>              time_val resd 1            ; timestamp
-     3 00000004 <res 0000000C>              time_str resb 12           ; buffer para a string ASCII
+     2 00000000 ????????                    time_val resd 1            ; timestamp
+     3 00000004 <res Ch>                    time_str resb 12           ; buffer para a string ASCII
      4                                  section .text
      5                                      global _start
      6                                  

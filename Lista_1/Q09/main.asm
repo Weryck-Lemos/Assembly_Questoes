@@ -1,78 +1,174 @@
+global main
+extern printf, scanf
+
 section .data
-    prompt db  "Digite a expressao: "
-    prompt_len  equ $-prompt
-
-    res_prefix  db  "Resultado: "
-    prefix_len  equ $-res_prefix
-
-    newline db  0xA
+    fmt_scan  db "%99s",0
+    fmt_print db "%d",10,0
+    s_ptr     dd 0
 
 section .bss
-    input_buf       resb 256
-    buffer_conv     resb 12
+    txt       resb 100
 
 section .text
-    global main
-    extern SumSub
-    extern s
 
-main:
-    mov eax, 4
-    mov ebx, 1
-    mov  ecx, prompt
-    mov edx, prompt_len
-    int 0x80
+Fator:
+    push ebp
+    mov ebp, esp
+    push ebx
 
-    mov eax, 3
-    mov ebx, 0
-    mov ecx, input_buf
-    mov edx, 255
-    int 0x80
+    mov ebx, [s_ptr]
+    mov al, byte [ebx]
+    cmp al, '('
+    jne .FDigit
 
-    mov ebx, eax
-    cmp ebx, 1
-    jle skip_term
-    dec ebx
-    mov byte [input_buf + ebx], 0
-skip_term:
+    inc dword [s_ptr]
+    call SumSub   
+    mov ebx, [s_ptr]
+    mov cl, byte [ebx]
+    cmp cl, ')'
+    jne .FExit
+    inc dword [s_ptr]
 
-    lea eax, [input_buf]
-    mov [s], eax
-
-    call SumSub
-
-    mov ecx, 10
-    lea edi, [buffer_conv + 12]
-    call converter_digitos
-
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, res_prefix
-    mov edx, prefix_len
-    int 0x80
-
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, edi
-    mov edx, buffer_conv + 12
-    sub edx, edi
-    int 0x80
-
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, newline
-    mov edx, 1
-    int 0x80
-
-    xor     eax, eax
+.FExit:
+    pop ebx
+    pop ebp
     ret
 
-converter_digitos:
-    xor edx, edx
-    div ecx
-    add dl, '0'
-    dec edi
-    mov [edi], dl
-    test eax, eax
-    jnz converter_digitos
+.FDigit:
+    xor eax, eax
+
+.FLoop:
+    mov ebx, [s_ptr]
+    mov cl, byte [ebx]
+    cmp cl, '0'
+    jl .FExit
+    cmp cl, '9'
+    jg .FExit
+
+    ;v = v*10
+    mov    edx, eax
+    shl    eax, 3
+    shl    edx, 1
+    add    eax, edx
+
+    ; v += digit
+    sub    cl, '0'
+    movzx  ecx, cl
+    add    eax, ecx
+
+    mov ebx, [s_ptr]
+    inc ebx
+    mov [s_ptr], ebx
+    jmp .FLoop
+
+    ;guarda eax
+    jmp    .FExit
+
+MultDiv:
+    push   ebp
+    mov    ebp, esp
+    push   ebx 
+    push   edx
+
+    call   Fator
+    mov    ebx, eax 
+
+.MDLoop:
+    mov    ecx, [s_ptr]
+    mov    dl, byte [ecx]
+    cmp    dl, '*'
+    je     .MDOp
+    cmp    dl, '/'
+    jne    .MDEnd
+
+.MDOp:
+    inc    dword [s_ptr]     ; consome '*' ou '/'
+
+    push   edx       
+    call   Fator ; eax = w
+    mov    ecx, eax  ; ecx = w
+    pop    edx            
+
+    cmp    dl, '*'
+    je     .MDMul
+
+    mov    eax, ebx
+    cdq
+    idiv   ecx
+    mov    ebx, eax
+    jmp    .MDLoop
+
+.MDMul:
+    imul   ebx, ecx  
+    jmp    .MDLoop
+
+.MDEnd:
+    mov    eax, ebx
+    pop    edx
+    pop    ebx
+    pop    ebp
+    ret
+
+SumSub:
+    push   ebp
+    mov    ebp, esp
+    push   ebx 
+    push   edx 
+
+    call   MultDiv
+    mov    ebx, eax  
+
+.SSLoop:
+    mov    ecx, [s_ptr]
+    mov    dl, byte [ecx]
+    cmp    dl, '+'
+    je     .SSOp
+    cmp    dl, '-'
+    jne    .SSEnd
+
+.SSOp:
+    inc    dword [s_ptr]
+
+    push   edx
+    call   MultDiv 
+    mov    ecx, eax  
+    pop    edx
+
+    cmp    dl, '+'
+    je     .SSAdd
+    sub    ebx, ecx
+    jmp    .SSLoop
+
+.SSAdd:
+    add    ebx, ecx          ; v += w
+    jmp    .SSLoop
+
+.SSEnd:
+    mov    eax, ebx 
+    pop    edx
+    pop    ebx
+    pop    ebp
+    ret
+
+main:
+    push   ebp
+    mov    ebp, esp
+
+    lea    eax, [txt]
+    push   eax
+    push   fmt_scan
+    call   scanf
+    add    esp, 8
+
+    lea    eax, [txt]
+    mov    [s_ptr], eax
+
+    call   SumSub
+    push   eax
+    push   fmt_print
+    call   printf
+    add    esp, 8
+
+    mov    eax, 0
+    pop    ebp
     ret

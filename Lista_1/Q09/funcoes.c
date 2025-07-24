@@ -51,3 +51,11 @@ int SumSub() {
     }
     return v;
 }
+
+int main() {
+    char txt[100];
+    scanf("%99s", txt);
+    s = txt;
+    printf("%i\n", SumSub());
+    return 0;
+}
