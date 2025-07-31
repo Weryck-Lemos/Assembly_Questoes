@@ -83,11 +83,11 @@ atoi:
     movzx edx, byte [entrada + ebx]
     cmp dl, 10          
     je .done
-    cmp dl, 0 
+    cmp dl, 0
     je .done
     sub dl, '0'
     imul eax, eax, 10
-    add eax, edx
+    add eax, edx  
     inc ebx
     jmp .next_char
 .done:

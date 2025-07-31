@@ -7,8 +7,7 @@ section .data
 
 section .bss
     buffer resb 12
-
-buffer_end equ buffer + 12
+    buffer_end equ buffer + 12
 
 section .text
     global  main

@@ -59,3 +59,7 @@ int main() {
     printf("%i\n", SumSub());
     return 0;
 }
+
+// 10*(5+2) = 70
+//v  = 10
+//w = 7

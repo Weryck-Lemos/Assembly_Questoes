@@ -1,7 +1,7 @@
 section .data
     num1 dd 100
     num2 dd -25
-    num3 dd -5
+    num3 dd -30
     newline db 10
     buffer times 10 db 0
 

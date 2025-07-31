@@ -1,10 +1,10 @@
 section .data
     mat dd 4,5,-3   ;a:0   b:4   c:8 
-        dd 2,1,0   ;d:12  e:16  f:20
+        dd 2,1,0    ;d:12  e:16  f:20
         dd 3,-1,1   ;g:24  h:28  i:32
     newline db 0xA
 
-    fmt db "Determinante: %d", 0xA, 0
+    fmt db "Determinante: %d", 10, 0
 
 section .bss
     buffer resb 12

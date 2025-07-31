@@ -11,6 +11,25 @@ section .bss
 
 section .text
 
+main:
+    lea    eax, [txt]
+    push   eax
+    push   fmt_scan
+    call   scanf
+    add    esp, 8
+
+    lea    eax, [txt]
+    mov    [s_ptr], eax
+
+    call   SumSub
+    push   eax
+    push   fmt_print
+    call   printf
+    add    esp, 8
+
+    mov    eax, 0
+    ret
+
 Fator:
     push ebp
     mov ebp, esp
@@ -147,28 +166,5 @@ SumSub:
     mov    eax, ebx 
     pop    edx
     pop    ebx
-    pop    ebp
-    ret
-
-main:
-    push   ebp
-    mov    ebp, esp
-
-    lea    eax, [txt]
-    push   eax
-    push   fmt_scan
-    call   scanf
-    add    esp, 8
-
-    lea    eax, [txt]
-    mov    [s_ptr], eax
-
-    call   SumSub
-    push   eax
-    push   fmt_print
-    call   printf
-    add    esp, 8
-
-    mov    eax, 0
     pop    ebp
     ret

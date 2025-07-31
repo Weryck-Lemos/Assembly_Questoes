@@ -7,7 +7,7 @@ section .data
 
 section .bss
     buffer resb 64  
-buffer_end equ buffer + 64
+    buffer_end equ buffer + 64
 
 section .text
     global  main
@@ -15,71 +15,70 @@ section .text
 
 main:
 ;abrir
-    mov     eax, 5 
-    mov     ebx, filename
-    xor     ecx, ecx 
-    xor     edx, edx 
-    int     0x80
-    mov     ebp, eax 
+    mov  eax, 5 
+    mov  ebx, filename
+    mov  ecx, 0 
+    mov  edx, 0 
+    int  0x80
+    mov  ebp, eax 
 
 ;ler
-    mov     eax, 3  
-    mov     ebx, ebp
-    mov     ecx, buffer
-    mov     edx, 64
-    int     0x80
+    mov  eax, 3  
+    mov  ebx, ebp
+    mov  ecx, buffer
+    mov  edx, 64
+    int  0x80
 
 ;fechar
-    mov     eax, 6   
-    mov     ebx, ebp
-    int     0x80
-
+    mov eax, 6   
+    mov ebx, ebp
+    int 0x80
  
-    lea     esi, [buffer]  
-    push    esi
-    call    atoi
-    add     esp, 4
-    mov     [num1], eax
+    lea esi, [buffer]  
+    push  esi
+    call  atoi
+    add   esp, 4
+    mov   [num1], eax
 
 ;primeiro \n
 .skip1:
-    mov     al, [esi]
-    cmp     al, 10    
-    je      .after1
-    inc     esi
-    jmp     .skip1
+    mov   al, [esi]
+    cmp   al, 10    
+    je    .after1
+    inc   esi
+    jmp  .skip1
 .after1:
-    inc     esi 
+    inc  esi 
 
-    push    esi
-    call    atoi
-    add     esp, 4
-    mov     [num2], eax
+    push  esi
+    call  atoi
+    add   esp, 4
+    mov   [num2], eax
 
 ;segundo \n
 .skip2:
-    mov     al, [esi]
-    cmp     al, 10
-    je      .after2
-    inc     esi
-    jmp     .skip2
+    mov   al, [esi]
+    cmp   al, 10
+    je    .after2
+    inc   esi
+    jmp  .skip2
 .after2:
-    inc     esi              
+    inc   esi              
 
-    push    esi
-    call    atoi
-    add     esp, 4
-    mov     [num3], eax
+    push esi
+    call atoi
+    add  esp, 4
+    mov  [num3], eax
 
-    mov     eax, [num1]
-    mov     ebx, [num2]
-    mov     ecx, [num3]
+    mov eax, [num1]
+    mov ebx, [num2]
+    mov ecx, [num3]
 
-    mov     edx, eax          
-    cmp     ebx, edx
-    cmovl   edx, ebx
-    cmp     ecx, edx
-    cmovl   edx, ecx
+    mov   edx, eax          
+    cmp   ebx, edx
+    cmovl edx, ebx
+    cmp   ecx, edx
+    cmovl edx, ecx
 
     mov     eax, [num1]
     add     eax, [num2]

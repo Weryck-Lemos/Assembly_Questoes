@@ -41,20 +41,19 @@ copy_file:
     push esi
     push edi
 
-    ; open source (O_RDONLY)
+
     mov   eax, SYS_OPEN
-    mov   ebx, [esp+16]        ; after pushes, src is at esp+16
+    mov   ebx, [esp+16]    
     xor   ecx, ecx
     int   0x80
-    mov   esi, eax             ; fd_src
+    mov   esi, eax         
 
-    ; open/create dest (O_WRONLY|O_CREAT|O_TRUNC, 0644)
     mov   eax, SYS_OPEN
-    mov   ebx, [esp+20]        ; dst at esp+20
+    mov   ebx, [esp+20]    
     mov   ecx, O_WRONLY|O_CREAT|O_TRUNC
     mov   edx, 0644
     int   0x80
-    mov   edi, eax             ; fd_dst
+    mov   edi, eax    
 
 .loop:
     mov   eax, SYS_READ
@@ -86,31 +85,31 @@ copy_file:
     ret   8
 
 move_file:
-    mov  eax, SYS_RENAME   ; syscall 38
-    mov  ebx, [esp+4]      ; old_path
-    mov  ecx, [esp+8]      ; new_path
-    int  0x80              ; rename(old_path, new_path)
-    ret  8                 ; limpa os 2 argumentos (2×4 bytes)
+    mov  eax, SYS_RENAME 
+    mov  ebx, [esp+4]  
+    mov  ecx, [esp+8]  
+    int  0x80        
+    ret  8             
 
 
 create_dir:
-    mov  eax, SYS_MKDIR   ; syscall 39
-    mov  ebx, [esp+4]     ; path
-    mov  ecx, [esp+8]     ; mode
-    int  0x80             ; mkdir(path, mode)
-    ret  8                ; limpa 2 argumentos (2×4 bytes)
+    mov  eax, SYS_MKDIR 
+    mov  ebx, [esp+4] 
+    mov  ecx, [esp+8]  
+    int  0x80   
+    ret  8    
 
 remove_dir:
-    mov  eax, SYS_RMDIR   ; syscall 40
-    mov  ebx, [esp+4]     ; path
-    int  0x80             ; rmdir(path)
-    ret  4                ; limpa 1 argumento (4 bytes)
+    mov  eax, SYS_RMDIR   
+    mov  ebx, [esp+4]     
+    int  0x80         
+    ret  4      
 
 copy_dir:
-    mov  eax, SYS_MKDIR   ; syscall 39 = mkdir
-    mov  ebx, [esp+8]     ; segundo argumento: dst_dir
-    mov  ecx, 0755        ; modo do diretório
-    int  0x80             ; mkdir(dst_dir, 0755)
+    mov  eax, SYS_MKDIR   
+    mov  ebx, [esp+8]  
+    mov  ecx, 0755
+    int  0x80    
     ret  8
 
 
@@ -119,9 +118,9 @@ move_dir:
 
 
 chmod_file:
-    mov  eax, SYS_CHMOD   ; syscall 15
-    mov  ebx, [esp+4]     ; path
-    mov  ecx, [esp+8]     ; mode
-    int  0x80             ; chmod(path, mode)
-    ret  8                ; limpa 2 argumentos (2×4 bytes)
+    mov  eax, SYS_CHMOD
+    mov  ebx, [esp+4]   
+    mov  ecx, [esp+8]  
+    int  0x80           
+    ret  8                
 

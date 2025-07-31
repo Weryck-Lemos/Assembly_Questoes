@@ -1,12 +1,9 @@
-; time_update.asm — exibe data/hora atualizada a cada segundo no mesmo lugar
-; Linux x86 32‑bits, ligações dinâmicas com libc
-
 section .data
-    fmt     db "%d/%m/%Y %H:%M:%S", 0   ; formato para strftime (sem newline)
-    buf     times 20 db 0              ; buffer (>=19 chars + NUL)
+    fmt     db "%d/%m/%Y %H:%M:%S", 0
+    buf     times 20 db 0          
 
 section .bss
-    time_val    resd 1                 ; time_t
+    time_val    resd 1   
 
 section .text
     global _start
@@ -14,42 +11,37 @@ section .text
 
 _start:
 .loop:
-    ; — 1) time(&time_val)
-    push    dword time_val
-    call    time
-    add     esp, 4
+    push dword time_val
+    call time
+    add  esp, 4
 
-    ; — 2) localtime(&time_val)
-    push    dword time_val
-    call    localtime
-    add     esp, 4    ; EAX = ponteiro struct tm
+    push dword time_val
+    call localtime
+    add  esp, 4
 
-    ; — 3) strftime(buf, 20, fmt, tm)
-    push    eax        ; struct tm *
-    push    dword fmt  ; formato
-    push    dword 20   ; tamanho máximo (inclui NUL)
-    push    dword buf  ; destino
-    call    strftime
-    add     esp, 16    ; limpa os argumentos
-                      ; → EAX = número de bytes escritos (sem contar o NUL)
+    push  eax  
+    push  dword fmt
+    push  dword 20  
+    push  dword buf 
+    call  strftime
+    add   esp, 16 
+        
 
-    ; — 4) sobrescrever o NUL com CR (‘\r’)
-    mov     ecx, eax      ; salva comprimento
-    mov     byte [buf+ecx], 0x0D
-    inc     eax           ; agora EAX = comprimento + 1 (inclui o CR)
 
-    ; — 5) write(1, buf, eax)
-    mov     edx, eax      ; edx = len+1
-    mov     ecx, buf      ; ecx = ptr
-    mov     ebx, 1        ; stdout
-    mov     eax, 4        ; sys_write
-    int     0x80
+    mov   ecx, eax  
+    mov   byte [buf+ecx], 0x0D
+    inc   eax   
 
-    ; — 6) sleep(1)
+
+    mov   edx, eax  
+    mov  ecx, buf  
+    mov  ebx, 1    
+    mov  eax, 4  
+    int  0x80
+
+    ;sleep
     push    dword 1
     call    sleep
     add     esp, 4
 
-    jmp     .loop         ; repete
-
-    ; (não há exit; finalize com Ctrl+C)
+    jmp     .loop  
